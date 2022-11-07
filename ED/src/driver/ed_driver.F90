@@ -36,6 +36,8 @@ subroutine ed_driver()
    use hrzshade_utils       , only : init_cci_variables            ! ! subroutine
    use canopy_radiation_coms, only : ihrzrad                       ! ! intent(in)
    use random_utils         , only : init_random_seed              ! ! subroutine
+   use hurricane            , only : read_hurricane_db             ! ! subroutine
+   use hurricane_coms       , only : include_hurricanes
    implicit none
    !----- Included variables. -------------------------------------------------------------!
 #if defined(RAMS_MPI)
@@ -352,6 +354,25 @@ subroutine ed_driver()
 #if defined(RAMS_MPI)
         if (mynum < nnodetot ) call MPI_Send(ping,1,MPI_INTEGER,sendnum,62,MPI_COMM_WORLD  &
                                             ,ierr)
+#endif
+    end if
+   !---------------------------------------------------------------------------------------!
+
+   !---------------------------------------------------------------------------------------!
+   !      Read hurricane schedule if applicable.                                           !
+   !                                                                                       !
+   ! There may be a better place to do this.
+   !---------------------------------------------------------------------------------------!
+   if (include_hurricanes /= 0) then
+#if defined(RAMS_MPI)
+if (mynum /= 1) call MPI_Recv(ping,1,MPI_INTEGER,recvnum,62,MPI_COMM_WORLD         &
+                             ,MPI_STATUS_IGNORE,ierr)
+#endif
+    if (mynum == nnodetot) write(unit=*,fmt='(a)') ' [+] Load hurricane schedule...'
+    call read_hurricane_db()
+#if defined(RAMS_MPI)
+            if (mynum < nnodetot ) call MPI_Send(ping,1,MPI_INTEGER,sendnum,62,MPI_COMM_WORLD  &
+                                                ,ierr)
 #endif
     end if
    !---------------------------------------------------------------------------------------!

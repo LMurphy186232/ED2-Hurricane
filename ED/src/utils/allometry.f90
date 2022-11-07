@@ -190,6 +190,72 @@ module allometry
 
 
 
+   !=======================================================================================!
+   !=======================================================================================!
+   !     Function that finds height from BDEAD                                             !
+   ! DBH is only used in the case where size - dbh^2 * h. If this function is being        !
+   ! used, there is every possibility that you don't know exactly what the correct DBH     !
+   ! should be. So in the case of IALLOM = 3 or IALLOM = 4, this will push things off      !
+   ! allometry by potentially an unexpected amount.                                        !
+   !---------------------------------------------------------------------------------------!
+   real function bd2h(bdead,dbh,ipft)
+
+      use pft_coms    , only : C2B         & ! intent(in)
+                             , bdead_crit  & ! intent(in)
+                             , b1Bs_small  & ! intent(in)
+                             , b2Bs_small  & ! intent(in)
+                             , b1Bs_large  & ! intent(in)
+                             , b2Bs_large  & ! intent(in)
+                             , is_grass    & ! intent(in)
+                             , is_tropical & ! intent(in)
+                             , is_liana    ! ! intent(in)
+      use ed_misc_coms, only : igrass      & ! intent(in)
+                             , iallom      ! ! intent(in)
+      implicit none
+
+      !----- Arguments --------------------------------------------------------------------!
+      real   , intent(in) :: dbh
+      real   , intent(in) :: bdead
+      integer, intent(in) :: ipft
+      !----- Local variables. -------------------------------------------------------------!
+      real                :: size
+      !------------------------------------------------------------------------------------!
+
+
+      !------------------------------------------------------------------------------------!
+      !     Structural biomass depends on the allometry and the size.                      !
+      !------------------------------------------------------------------------------------!
+      if (igrass == 1 .and. is_grass(ipft)   ) then
+         bd2h = 0.0
+      else
+
+         !----- Decide parameters based on seedling/adult size. ---------------------------!
+         if (bdead <= bdead_crit(ipft)) then
+            size = (bdead * C2B / b1Bs_small(ipft)) ** (1/b2Bs_small(ipft))
+         else
+            size = (bdead * C2B / b1Bs_large(ipft)) ** (1/b2Bs_large(ipft))
+         end if
+
+         !---------------------------------------------------------------------------------!
+
+         !----- Depending on the allometry, size means DBH or DBH^2 * Height. -------------!
+         if ( (iallom == 3 .or. iallom == 4)                            &
+              .and. is_tropical(ipft) .and. (.not. is_liana(ipft))) then
+            bd2h = size / (dbh * dbh)
+         else
+            bd2h = dbh2h(ipft, size)
+         end if
+         !---------------------------------------------------------------------------------!
+      end if
+      !------------------------------------------------------------------------------------!
+
+      return
+   end function bd2h
+   !=======================================================================================!
+   !=======================================================================================!
+
+
+
 
 
 

@@ -75,6 +75,8 @@ OBJ_MODEL =                        \
 	hdf5_utils.o               \
 	heun_driver.o              \
 	hrzshade_utils.o           \
+	hurricane.o                \
+	hurricane_coms.o           \
 	hybrid_driver.o            \
 	hydrology_coms.o           \
 	hydrology_constants.o      \

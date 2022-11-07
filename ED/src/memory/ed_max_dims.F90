@@ -293,6 +293,10 @@ module ed_max_dims
 #endif
    !---------------------------------------------------------------------------------------!
 
+   !----- Maximum number of hurricanes that can be scheduled ------------------------------!
+   integer, parameter :: max_hurricanes = 999
+   !---------------------------------------------------------------------------------------!
+
 
    !----- Maximum number of files (site+patch+cohort). ------------------------------------!
    integer, parameter :: maxlist = 3 * maxfiles

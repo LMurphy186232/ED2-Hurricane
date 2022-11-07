@@ -736,6 +736,8 @@ module pft_coms
    real   , dimension(n_pft)    :: balive_crit
    !----- Critical balive+bdead ("Everything but storage"). -------------------------------!
    real   , dimension(n_pft)    :: bevery_crit
+   !> Tolerance for DBH-height allometry mismatch, in units of m height
+   real   , dimension(n_pft)    :: off_allom_tol
    !=======================================================================================!
    !=======================================================================================!
 
@@ -953,6 +955,28 @@ module pft_coms
    !=======================================================================================!
    real :: h_edge          !< maximum height advantage for lianas
    real :: liana_dbh_crit  !< liana specific critical dbh
+   !=======================================================================================!
+   !=======================================================================================!
+
+
+
+   !=======================================================================================!
+   !=======================================================================================!
+   !     Hurricane parameters.                                                             !
+   !=======================================================================================!
+   !=======================================================================================!
+   real, dimension(n_pft) :: hurr_a1 !< "a" in probability of light damage eqn
+   real, dimension(n_pft) :: hurr_a2 !< "a" in probability of medium damage eqn
+   real, dimension(n_pft) :: hurr_c  !< Storm intensity coefficient
+   real, dimension(n_pft) :: hurr_b  !< Storm DBH coefficient
+   real, dimension(n_pft) :: hurr_g  !< Storm survival "g" parameter
+   real, dimension(n_pft) :: hurr_h  !< Storm survival "h" parameter
+   real, dimension(n_pft) :: med_dmg_min  !< Minimum loss of structural for medium damage
+   real, dimension(n_pft) :: med_dmg_max  !< Maximum loss of structural for medium damage
+   real, dimension(n_pft) :: max_dmg_min  !< Minimum loss of structural for heavy damage
+   real, dimension(n_pft) :: max_dmg_max  !< Maximum loss of structural for heavy damage
+   real :: min_hurr_dbh              !< Minimum DBH for cohorts to be affected by hurricanes
+
    !=======================================================================================!
    !=======================================================================================!
 

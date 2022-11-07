@@ -49,6 +49,7 @@ module vegetation_dynamics
       use fusion_fission_coms  , only : ifusion                       ! ! intent(in)
       use fire                 , only : fire_frequency                ! ! sub-routine
       use budget_utils         , only : ed_init_budget                ! ! sub-routine
+      use hurricane            , only : apply_hurricane               ! ! sub-routine
       implicit none
       !----- Arguments. -------------------------------------------------------------------!
       logical          , intent(in)   :: new_month    !> First dtlsm of a new month?
@@ -113,6 +114,9 @@ module vegetation_dynamics
 
             !----- Update the mean workload counter. --------------------------------------!
             call update_workload(cgrid)
+
+            !----- Apply hurricanes. ------------------------------------------------------!
+            call apply_hurricane(cgrid)
 
             !----- Update the growth of the structural biomass. ---------------------------!
             call dbstruct_dt(cgrid,veget_dyn_on,new_year)

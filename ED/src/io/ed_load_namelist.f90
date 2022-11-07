@@ -174,6 +174,8 @@ subroutine copy_nl(copy_type)
                                    , cl_fseeds_harvest         & ! intent(out)
                                    , cl_fstorage_harvest       & ! intent(out)
                                    , cl_fleaf_harvest          ! ! intent(out)
+  use hurricane_coms        , only : include_hurricanes        &
+                                   , hurricane_db
    use pft_coms             , only : include_these_pft         & ! intent(out)
                                    , pasture_stock             & ! intent(out)
                                    , agri_stock                & ! intent(out)
@@ -530,6 +532,9 @@ subroutine copy_nl(copy_type)
       
       growth_resp_scheme        = nl%growth_resp_scheme
       storage_resp_scheme       = nl%storage_resp_scheme
+
+      include_hurricanes        = nl%include_hurricanes
+      hurricane_db              = nl%hurricane_db
 
       !----- Print control parameters. ----------------------------------------------------!
       iprintpolys               = nl%iprintpolys

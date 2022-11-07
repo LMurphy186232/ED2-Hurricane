@@ -251,6 +251,12 @@ module ename_coms
       real                                              :: ribmax
       real                                              :: leaf_maxwhc
 
+      !------ Controls hurricanes ---------------------------------------------------------!
+      !< Whether to include hurricanes (1) or not (0)
+      integer                                           :: include_hurricanes
+      !< Name of file with hurricane schedule
+      character(len=str_len)                            :: hurricane_db
+
       !----- Options for printing polygon vectors/arrays to standard output. --------------!
       integer                                           :: iprintpolys
       integer                                           :: npvars
@@ -598,6 +604,9 @@ module ename_coms
 
       enl%zrough                    = undef_real
       enl%edres                     = undef_real 
+
+      enl%include_hurricanes        = undef_integer
+      enl%hurricane_db              = undef_path
 
       return
    end subroutine init_ename_vars

@@ -219,6 +219,7 @@ subroutine load_ed_ecosystem_params()
    call init_phen_coms()
    call init_ed_misc_coms()
    call init_hrzshade_params()
+   call init_hurricane_params()
    !---------------------------------------------------------------------------------------!
 
 
@@ -941,6 +942,72 @@ end subroutine init_disturb_params
 !==========================================================================================!
 
 
+
+
+!==========================================================================================!
+!==========================================================================================!
+subroutine init_hurricane_params
+
+   !use hurricane_coms , only : hurricane_db
+   use pft_coms       , only : hurr_a1        &
+                             , hurr_a2        &
+                             , hurr_c         &
+                             , hurr_b         &
+                             , hurr_g         &
+                             , hurr_h         &
+                             , min_hurr_dbh   &
+                             , med_dmg_min    &
+                             , med_dmg_max    &
+                             , max_dmg_min    &
+                             , max_dmg_max
+   implicit none
+
+   !hurricane_db  = ''
+
+   min_hurr_dbh = 10.0
+
+   !---------------------------------------------------------------------------------------!
+   !     Initialize hurricane parameters                                                   !
+   ! We have no basis for parameterizing non-tropical PFTs with damage and survival        !
+   ! parameters. Any tree PFT we don't already know about, give them late tropical values  !
+   ! just to avoid memory problems
+   !---------------------------------------------------------------------------------------!
+
+   !----- Put in the late values as a default ---------------------------------------------!
+   hurr_a1 = 2.2203369
+   hurr_a2 = 3.7107217
+   hurr_b  = 0.2238506
+   hurr_c  = -1.941200
+   hurr_g  = 1.438688
+   hurr_h  = 0.005136475
+   med_dmg_min = 0.2
+   med_dmg_max = 0.5
+   max_dmg_min = 0.5
+   max_dmg_max = 0.8
+
+   !----- Put in the rest of the tropical values ------------------------------------------!
+   hurr_a1(2)  = 2.4636
+   hurr_a1(3)  = 2.4705823
+
+   hurr_a2(2)  = 3.0796
+   hurr_a2(3)  = 3.4985469
+
+   hurr_b(2)  = 0.026185
+   hurr_b(3)  = 0.1327321
+
+   hurr_c(2)  = -4.20356
+   hurr_c(3)  = -3.0648894
+
+   hurr_g(2)  = 0.596089
+   hurr_g(3)  = 1.985226
+
+   hurr_h(2)  = -0.06984992
+   hurr_h(3)  = -0.05683523
+
+   return
+end subroutine init_hurricane_params
+!==========================================================================================!
+!==========================================================================================!
 
 
 
@@ -2945,7 +3012,8 @@ subroutine init_pft_alloc_params()
                              , branch_diam           & ! intent(out)
                              , h_edge                & ! intent(out)
                              , liana_dbh_crit        & ! intent(out)
-                             , nbt_lut               ! ! intent(out)
+                             , nbt_lut               & ! intent(out)
+                             , off_allom_tol         ! ! intent(out)
    use allometry      , only : h2dbh                 & ! function
                              , dbh2h                 & ! function
                              , size2bd               & ! function
@@ -2954,6 +3022,7 @@ subroutine init_pft_alloc_params()
                              , onesixth              & ! intent(in)
                              , twothirds             & ! intent(in)
                              , huge_num              & ! intent(in)
+                             , almost_zero           & ! intent(in)
                              , pi1                   ! ! intent(in)
    use ed_max_dims    , only : n_pft                 & ! intent(in)
                              , str_len               & ! intent(in)
@@ -3746,6 +3815,15 @@ subroutine init_pft_alloc_params()
       dbh_crit   (ipft) = h2dbh(hgt_max(ipft),ipft)
    end do
    !---------------------------------------------------------------------------------------!
+
+
+   !---------------------------------------------------------------------------------------!
+   !   Tolerance for being off allometry in the DBH-height relationship. This is in        !
+   ! units of m of height; if expected height from DBH is more than this value greater     !
+   ! than actual height, structural growth will strive to get back on allometry before     !
+   ! reproducing. Default is no tolerance. --LEM                                                                    !
+   !---------------------------------------------------------------------------------------!
+   off_allom_tol(1:18) = almost_zero
 
 
    !---------------------------------------------------------------------------------------!

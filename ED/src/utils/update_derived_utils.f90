@@ -50,6 +50,7 @@ module update_derived_utils
    !=======================================================================================!
    !     This subroutine will assign values derived from the basic properties of a given   !
    ! cohort.                                                                               !
+   ! Modified by Lora Murphy to not allow DBH to shrink.                                   !
    !---------------------------------------------------------------------------------------!
    subroutine update_cohort_derived_props(cpatch,ico,lsl,new_year,llspan_toc            &
                                          ,vm_bar_toc,rd_bar_toc,sla_toc)
@@ -74,6 +75,7 @@ module update_derived_utils
                                 , yr1st_census            & ! intent(in)
                                 , mon1st_census           & ! intent(in)
                                 , min_recruit_dbh         ! ! intent(in)
+      use hurricane_coms , only : coh_off_allom
       implicit none
       !----- Arguments --------------------------------------------------------------------!
       type(patchtype), target     :: cpatch
@@ -86,6 +88,7 @@ module update_derived_utils
       real           , intent(in) :: sla_toc
       !----- Local variables --------------------------------------------------------------!
       real                        :: bleaf_max
+      real                        :: dbh_aim
       integer                     :: ipft
       integer                     :: elapsed_months
       logical                     :: census_time
@@ -116,8 +119,25 @@ module update_derived_utils
           cpatch%hite(ico) = bl2h  (cpatch%bleaf(ico), cpatch%sla(ico), ipft)
       else
           !---- Trees and old grasses get dbh from bdead. ---------------------------------!
+          !---- Determine what DBH should be based on BDEAD -------------------------------!
+          dbh_aim          = bd2dbh(ipft, cpatch%bdeada(ico), cpatch%bdeadb(ico))
+
+          !----- We want to test for being off-allometry. Guard against the case where ----!
+          !----- a floating-point number infinitesimally smaller than the existing number -!
+          !----- makes us think we're off allometry ---------------------------------------!
+          if (dbh_aim >= cpatch%dbh(ico) .or. ABS(dbh_aim - cpatch%dbh(ico)) < 0.1) then
+            !---- DBH has increased! Proceed as normal ------------------------------------!
           cpatch%dbh(ico)  = bd2dbh(ipft, cpatch%bdeada(ico), cpatch%bdeadb(ico))
           cpatch%hite(ico) = dbh2h (ipft, cpatch%dbh   (ico))
+          else
+            !------------------------------------------------------------------------------!
+            !   Do not let DBH shrink. Height matches BDEAD, not DBH. Cohort will be       !
+            ! off allometry. There is missing BDEAD biomass and the cohort must replace    !
+            ! it before growing further.                                                   !
+            !------------------------------------------------------------------------------!
+            cpatch%hite(ico) = dbh2h (ipft, dbh_aim)
+            coh_off_allom = coh_off_allom + 1
+          end if
       end if
       !------------------------------------------------------------------------------------!
 

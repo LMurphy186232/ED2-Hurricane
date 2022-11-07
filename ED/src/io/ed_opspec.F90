@@ -1269,6 +1269,7 @@ subroutine ed_opspec_misc
                                     , cl_fseeds_harvest            & ! intent(in)
                                     , cl_fstorage_harvest          & ! intent(in)
                                     , cl_fleaf_harvest             ! ! intent(in)
+   use hurricane_coms        , only : include_hurricanes
    use phenology_coms        , only : iphen_scheme                 & ! intent(in)
                                     , repro_scheme                 & ! intent(in)
                                     , radint                       & ! intent(in)
@@ -2265,6 +2266,26 @@ end do
          ifaterr = ifaterr +1
       end if
    end if
+
+   !---------------------------------------------------------------------------------------!
+   !   Validate hurricane settings                                                         !
+   !---------------------------------------------------------------------------------------!
+   if (include_hurricanes < 0 .or. include_hurricanes > 1) then
+      write (reason,fmt='(a,1x,i4,a)')                                                     &
+                    'Invalid INCLUDE_HURRICANES, it must be 0 or 1. Yours is set to'       &
+                    ,include_hurricanes,'...'
+      call opspec_fatal(reason,'opspec_misc')
+      ifaterr = ifaterr +1
+   end if
+
+   !---- Cannot use hurricanes when BIGLEAF is true ---------------------------------------!
+   if (include_hurricanes > 0 .and. ibigleaf == 1) then
+     write (reason,fmt='(a,1x)') 'Cannot use hurricanes if ED2 is in BIGLEAF mode.'
+     call opspec_fatal(reason,'opspec_misc')
+     ifaterr = ifaterr +1
+   end if
+   !---------------------------------------------------------------------------------------!
+
 
    if (ianth_disturb < 0 .or. ianth_disturb > 2) then
       write (reason,fmt='(a,1x,i4,a)')                                                     &
